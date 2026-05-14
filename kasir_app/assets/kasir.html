@@ -1,0 +1,1631 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SDM Pharma — Kasir</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f0f4f8;
+    --surface: #ffffff;
+    --card: #ffffff;
+    --border: #dde3ed;
+    --accent: #2563eb;
+    --accent2: #059669;
+    --warn: #d97706;
+    --danger: #dc2626;
+    --text: #1e293b;
+    --muted: #64748b;
+    --mono: 'DM Mono', monospace;
+    --sans: 'Syne', sans-serif;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    background-image: radial-gradient(ellipse at 20% 0%, #dbeafe 0%, transparent 55%),
+                      radial-gradient(ellipse at 80% 100%, #d1fae5 0%, transparent 55%);
+  }
+
+  header {
+    padding: 18px 28px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    background: rgba(255,255,255,0.88);
+    backdrop-filter: blur(12px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo-badge {
+    background: linear-gradient(135deg, #3b82f6, #06d6a0);
+    width: 38px; height: 38px;
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  header h1 { font-size: 1.1rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; }
+  header span { font-family: var(--mono); font-size: 0.72rem; color: var(--muted); letter-spacing: 0.04em; }
+
+  .date-badge {
+    margin-left: auto;
+    background: var(--card);
+    border: 1px solid var(--border);
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--muted);
+  }
+
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 380px;
+    gap: 20px;
+    padding: 20px 28px;
+    max-width: 1400px;
+    margin: 0 auto;
+  }
+
+  /* LEFT PANEL */
+  .left-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .section-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.06), 0 4px 16px rgba(0,0,0,0.04);
+  }
+
+  /* Price toggle */
+  .price-toggle {
+    display: flex;
+    gap: 8px;
+  }
+
+  .toggle-btn {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+  }
+
+  .toggle-btn.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 0 16px rgba(59,130,246,0.35);
+  }
+
+  /* Category tabs */
+  .cat-tabs {
+    display: flex;
+    gap: 6px;
+    padding: 4px;
+    background: var(--bg);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+  }
+
+  .cat-tab {
+    flex: 1;
+    padding: 8px 4px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+
+  .cat-tab.active {
+    background: #ffffff;
+    color: var(--text);
+    box-shadow: 0 1px 6px rgba(0,0,0,0.1);
+  }
+
+  /* Product select */
+  .product-select-wrap { position: relative; }
+
+  .product-select-wrap::after {
+    content: '▾';
+    position: absolute;
+    right: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    pointer-events: none;
+  }
+
+  select {
+    width: 100%;
+    padding: 12px 40px 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.8rem;
+    appearance: none;
+    cursor: pointer;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  select:focus { border-color: var(--accent); }
+  select option { background: #ffffff; color: var(--text); }
+  select optgroup { background: #f0f4f8; color: var(--muted); font-style: italic; }
+
+  /* Add row */
+  .add-row {
+    display: grid;
+    grid-template-columns: 1fr 90px 90px auto;
+    gap: 10px;
+    align-items: end;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 0.68rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 6px;
+    font-weight: 600;
+  }
+
+  input[type="number"] {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="number"]:focus { border-color: var(--accent); }
+  input[type="number"]::-webkit-inner-spin-button { display: none; }
+
+  .disc-input-wrap { position: relative; }
+  .disc-input-wrap input { padding-right: 30px; }
+  .disc-input-wrap::after { content: '%'; position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: var(--muted); font-family: var(--mono); font-size: 0.8rem; }
+
+  .btn-add {
+    padding: 12px 18px;
+    background: var(--accent);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+    letter-spacing: 0.04em;
+    box-shadow: 0 0 14px rgba(59,130,246,0.3);
+  }
+
+  .btn-add:hover { background: #2563eb; transform: translateY(-1px); }
+  .btn-add:active { transform: translateY(0); }
+
+  /* Product info preview */
+  .product-preview {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    min-height: 48px;
+  }
+
+  .preview-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .preview-dot.klinik { background: #6d28d9; }
+  .preview-dot.estetika1 { background: #059669; }
+  .preview-dot.estetika2 { background: #92400e; }
+  .preview-dot.other { background: #9d174d; }
+
+  .preview-name { font-size: 0.8rem; font-weight: 600; flex: 1; }
+  .preview-price { font-family: var(--mono); font-size: 0.82rem; color: var(--accent2); font-weight: 500; }
+  .preview-empty { color: var(--muted); font-size: 0.78rem; font-family: var(--mono); }
+
+  /* Cart table */
+  .cart-wrap { overflow-x: auto; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.8rem;
+  }
+
+  thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 0.65rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--muted);
+    font-weight: 600;
+    border-bottom: 1px solid var(--border);
+  }
+
+  thead th:last-child { text-align: center; }
+  thead th.num { text-align: right; }
+
+  tbody tr {
+    border-bottom: 1px solid rgba(180,195,215,0.5);
+    transition: background 0.15s;
+  }
+
+  tbody tr:hover { background: rgba(0,0,0,0.02); }
+
+  tbody td {
+    padding: 12px 12px;
+    vertical-align: middle;
+  }
+
+  .td-num {
+    font-family: var(--mono);
+    text-align: right;
+    color: var(--text);
+  }
+
+  .td-name { font-weight: 600; font-size: 0.78rem; }
+  .td-sub { font-size: 0.68rem; color: var(--muted); margin-top: 2px; font-family: var(--mono); }
+
+  .cat-pill {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .cat-pill.klinik { background: #ede9fe; color: #6d28d9; }
+  .cat-pill.estetika1 { background: #d1fae5; color: #065f46; }
+  .cat-pill.estetika2 { background: #fef3c7; color: #92400e; }
+  .cat-pill.other { background: #fce7f3; color: #9d174d; }
+
+  .disc-badge {
+    background: #fee2e2;
+    color: #b91c1c;
+    padding: 2px 7px;
+    border-radius: 6px;
+    font-family: var(--mono);
+    font-size: 0.7rem;
+  }
+
+  .qty-ctrl {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+  }
+
+  .qty-btn {
+    width: 26px; height: 26px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    line-height: 1;
+  }
+
+  .qty-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+  .qty-val { font-family: var(--mono); font-size: 0.82rem; min-width: 22px; text-align: center; }
+
+  .btn-del {
+    width: 28px; height: 28px;
+    border: 1px solid rgba(239,68,68,0.3);
+    border-radius: 7px;
+    background: rgba(239,68,68,0.08);
+    color: #ef4444;
+    cursor: pointer;
+    font-size: 0.9rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    margin: 0 auto;
+  }
+
+  .btn-del:hover { background: rgba(239,68,68,0.2); border-color: #ef4444; }
+
+  .empty-cart {
+    padding: 40px 20px;
+    text-align: center;
+    color: var(--muted);
+  }
+
+  .empty-cart .icon { font-size: 2.5rem; opacity: 0.3; margin-bottom: 10px; }
+  .empty-cart p { font-size: 0.82rem; font-family: var(--mono); }
+
+  /* RIGHT PANEL */
+  .right-panel { display: flex; flex-direction: column; gap: 16px; }
+
+  .summary-rows { display: flex; flex-direction: column; gap: 6px; }
+
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(180,195,215,0.5);
+  }
+
+  .summary-row:last-child { border-bottom: none; }
+
+  .summary-label { font-size: 0.78rem; color: var(--muted); }
+  .summary-val { font-family: var(--mono); font-size: 0.82rem; }
+
+  .summary-row.total {
+    padding-top: 14px;
+    margin-top: 4px;
+    border-top: 2px solid var(--border);
+    border-bottom: none;
+  }
+
+  .summary-row.total .summary-label {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .summary-row.total .summary-val {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--accent2);
+  }
+
+  /* Global disc */
+  .global-disc-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .global-disc-row input {
+    flex: 1;
+    padding: 10px 14px;
+  }
+
+  .global-disc-row .disc-input-wrap { flex: 1; }
+  .global-disc-row .disc-input-wrap input { padding-right: 30px; }
+
+  /* Payment */
+  .payment-section { display: flex; flex-direction: column; gap: 10px; }
+
+  .bayar-input-wrap { position: relative; }
+  .bayar-prefix {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: var(--mono);
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  .bayar-input-wrap input {
+    padding-left: 36px;
+    width: 100%;
+  }
+
+  .kembalian-box {
+    padding: 14px;
+    background: #ecfdf5;
+    border: 1px solid #6ee7b7;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kembalian-box .label { font-size: 0.78rem; color: #059669; font-weight: 700; letter-spacing: 0.06em; }
+  .kembalian-box .val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: #059669; }
+
+  .kurang-box {
+    padding: 14px;
+    background: #fef2f2;
+    border: 1px solid #fca5a5;
+    border-radius: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .kurang-box .label { font-size: 0.78rem; color: #dc2626; font-weight: 700; letter-spacing: 0.06em; }
+  .kurang-box .val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: #dc2626; }
+
+  .btn-bayar {
+    width: 100%;
+    padding: 15px;
+    background: linear-gradient(135deg, #3b82f6, #06d6a0);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: var(--sans);
+    font-weight: 800;
+    font-size: 0.95rem;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    box-shadow: 0 4px 20px rgba(59,130,246,0.3);
+  }
+
+  .btn-bayar:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(59,130,246,0.4); }
+  .btn-bayar:active { transform: translateY(0); }
+
+  .btn-clear {
+    width: 100%;
+    padding: 11px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--muted);
+    font-family: var(--sans);
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+    transition: all 0.2s;
+  }
+
+  .btn-clear:hover { border-color: var(--danger); color: var(--danger); }
+
+  /* Receipt modal */
+  .modal-overlay {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.7);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+
+  .modal-overlay.show { opacity: 1; pointer-events: all; }
+
+  .receipt {
+    background: #fff;
+    color: #111;
+    width: 340px;
+    max-height: 85vh;
+    overflow-y: auto;
+    border-radius: 16px;
+    padding: 28px 24px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    transform: scale(0.95);
+    transition: transform 0.25s;
+  }
+
+  .modal-overlay.show .receipt { transform: scale(1); }
+
+  .receipt-header { text-align: center; margin-bottom: 18px; padding-bottom: 14px; border-bottom: 2px dashed #ddd; }
+  .receipt-header h2 { font-family: var(--sans); font-size: 1.1rem; font-weight: 800; color: #111; letter-spacing: 0.08em; }
+  .receipt-header p { font-size: 0.7rem; color: #666; margin-top: 4px; }
+
+  .receipt-item { display: flex; justify-content: space-between; padding: 4px 0; }
+  .receipt-item .rname { flex: 1; padding-right: 8px; color: #333; }
+  .receipt-item .rval { color: #111; font-weight: 500; }
+
+  .receipt-div { border-top: 1px dashed #ddd; margin: 10px 0; }
+  .receipt-total { display: flex; justify-content: space-between; font-weight: 700; font-size: 0.85rem; padding: 4px 0; }
+  .receipt-kembalian { display: flex; justify-content: space-between; color: #059669; font-weight: 700; padding: 4px 0; }
+  .receipt-footer { text-align: center; margin-top: 14px; font-size: 0.68rem; color: #999; }
+
+  .btn-close-receipt {
+    width: 100%;
+    margin-top: 16px;
+    padding: 10px;
+    background: #111;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    font-family: var(--sans);
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    letter-spacing: 0.06em;
+  }
+
+  .ppn-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    margin-left: 10px;
+  }
+
+  .ppn-badge.hna { background: rgba(245,158,11,0.15); color: var(--warn); }
+  .ppn-badge.ppn { background: rgba(59,130,246,0.15); color: var(--accent); }
+
+  /* ===== TABLET ===== */
+  @media (max-width: 900px) {
+    .main {
+      grid-template-columns: 1fr;
+      padding: 12px 14px;
+      gap: 12px;
+      padding-bottom: 90px; /* room for bottom nav */
+    }
+    .right-panel {
+      display: none;
+    }
+    .right-panel.mobile-active {
+      display: flex;
+    }
+    .add-row { grid-template-columns: 1fr 80px 80px auto; }
+  }
+
+  /* ===== MOBILE ===== */
+  @media (max-width: 600px) {
+    header {
+      padding: 12px 14px;
+      gap: 10px;
+    }
+    header h1 { font-size: 0.9rem; }
+    header span { font-size: 0.62rem; display: none; }
+    .date-badge { font-size: 0.65rem; padding: 5px 10px; }
+
+    .main {
+      padding: 10px 10px;
+      gap: 10px;
+      padding-bottom: 86px;
+    }
+
+    .card { padding: 14px 12px; border-radius: 12px; }
+
+    /* Price toggle stacks on very small */
+    .price-toggle { flex-direction: column; gap: 6px; }
+    .toggle-btn { padding: 10px 8px; font-size: 0.8rem; }
+    .ppn-badge { margin-left: 0; margin-top: 4px; }
+
+    /* Category tabs — scrollable */
+    .cat-tabs {
+      gap: 4px;
+      padding: 3px;
+      overflow-x: auto;
+      flex-wrap: nowrap;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .cat-tabs::-webkit-scrollbar { display: none; }
+    .cat-tab {
+      flex: 0 0 auto;
+      padding: 7px 10px;
+      font-size: 0.72rem;
+      white-space: nowrap;
+    }
+
+    /* Add row: 2 columns on mobile */
+    .add-row {
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    /* Selected name spans full width */
+    .add-row .field-group:first-child {
+      grid-column: 1 / -1;
+    }
+    /* Add button spans full width */
+    .add-row .field-group:last-child {
+      grid-column: 1 / -1;
+    }
+    .btn-add {
+      width: 100%;
+      padding: 13px;
+      font-size: 0.9rem;
+    }
+
+    /* Cart table — mobile card style instead of table */
+    table, thead, tbody, th, td, tr { display: block; }
+    thead { display: none; }
+    tbody tr {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 8px;
+      padding: 10px 12px;
+      position: relative;
+    }
+    tbody tr:hover { background: var(--bg); }
+    tbody td { padding: 2px 0; border: none; text-align: left !important; }
+
+    /* Mobile cart td layout */
+    td.td-cart-name { order: 1; }
+    td.td-cart-price { order: 2; font-size: 0.78rem; color: var(--muted); }
+    td.td-cart-disc { display: inline; order: 3; }
+    td.td-cart-qty { order: 4; margin-top: 6px; }
+    td.td-cart-subtotal { order: 5; font-size: 0.9rem !important; }
+    td.td-cart-del {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      order: 0;
+    }
+
+    .qty-ctrl { justify-content: flex-start; }
+    .qty-btn { width: 32px; height: 32px; font-size: 1.1rem; }
+    .qty-val { font-size: 0.9rem; min-width: 28px; }
+
+    /* Summary card on mobile */
+    .summary-row.total .summary-val { font-size: 1rem; }
+
+    /* Receipt modal full screen on mobile */
+    .receipt {
+      width: 100%;
+      max-width: 100%;
+      max-height: 92vh;
+      border-radius: 20px 20px 0 0;
+      margin-top: auto;
+    }
+    .modal-overlay {
+      align-items: flex-end;
+    }
+    .modal-overlay.show .receipt { transform: scale(1) translateY(0); }
+
+    /* Payment quick buttons smaller */
+    .payment-section > div:nth-child(2) button {
+      padding: 8px 4px;
+      font-size: 0.7rem;
+    }
+  }
+
+  /* ===== BOTTOM NAV (mobile only) ===== */
+  .bottom-nav {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .bottom-nav {
+      display: flex;
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.97);
+      border-top: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+      z-index: 200;
+      padding: 0;
+      height: 64px;
+      box-shadow: 0 -2px 16px rgba(0,0,0,0.08);
+    }
+
+    .bottom-nav-btn {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-family: var(--sans);
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: color 0.2s;
+      padding: 0;
+      position: relative;
+    }
+
+    .bottom-nav-btn.active { color: var(--accent); }
+    .bottom-nav-btn .nav-icon { font-size: 1.3rem; line-height: 1; }
+
+    .bottom-nav-btn .cart-badge {
+      position: absolute;
+      top: 8px;
+      right: calc(50% - 14px);
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.58rem;
+      font-weight: 800;
+      width: 16px; height: 16px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      line-height: 1;
+    }
+  }
+
+  /* Float total badge on mobile */
+  .mobile-total-bar {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .mobile-total-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 12px 16px;
+      margin-bottom: 0;
+    }
+    .mobile-total-bar .mtb-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 0.08em; text-transform: uppercase; font-weight: 600; }
+    .mobile-total-bar .mtb-val { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--accent2); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">💊</div>
+  <div>
+    <h1>SDM Pharma</h1>
+    <span>SISTEM KASIR PRODUK DERMATOLOGI</span>
+  </div>
+  <div class="date-badge" id="dateNow">—</div>
+</header>
+
+<!-- Bottom Nav (mobile) -->
+<nav class="bottom-nav">
+  <button class="bottom-nav-btn active" id="nav-produk" onclick="mobileTab('produk')">
+    <span class="nav-icon">🛍️</span>
+    <span>Produk</span>
+    <span class="cart-badge" id="cartBadge" style="display:none;">0</span>
+  </button>
+  <button class="bottom-nav-btn" id="nav-bayar" onclick="mobileTab('bayar')">
+    <span class="nav-icon">💳</span>
+    <span>Bayar</span>
+  </button>
+</nav>
+
+<div class="main">
+  <!-- LEFT -->
+  <div class="left-panel">
+
+    <!-- Price Type -->
+    <div class="card">
+      <p class="section-label">Jenis Harga</p>
+      <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div class="price-toggle" style="flex:1; min-width:200px;">
+          <button class="toggle-btn active" id="btnHNA" onclick="setPriceType('hna')">HNA (Tanpa PPN)</button>
+          <button class="toggle-btn" id="btnPPN" onclick="setPriceType('ppn')">HNA + PPN (11%)</button>
+        </div>
+        <span class="ppn-badge hna" id="priceTypeBadge">HNA</span>
+      </div>
+    </div>
+
+    <!-- Add Product -->
+    <div class="card">
+      <p class="section-label" style="margin-bottom:12px;">Tambah Produk</p>
+
+      <!-- Category Tabs -->
+      <div class="cat-tabs" style="margin-bottom:12px;">
+        <button class="cat-tab active" id="tab-all" onclick="setCategory('all')">Semua</button>
+        <button class="cat-tab" id="tab-klinik" onclick="setCategory('klinik')">Derma Klinik</button>
+        <button class="cat-tab" id="tab-estetika1" onclick="setCategory('estetika1')">Estetika 1</button>
+        <button class="cat-tab" id="tab-estetika2" onclick="setCategory('estetika2')">Estetika 2</button>
+        <button class="cat-tab" id="tab-other" onclick="setCategory('other')">Other</button>
+      </div>
+
+      <!-- Product select -->
+      <div class="product-select-wrap" style="margin-bottom:12px;">
+        <select id="productSelect" onchange="onProductChange()">
+          <option value="">— Pilih Produk —</option>
+        </select>
+      </div>
+
+      <!-- Preview -->
+      <div class="product-preview" id="productPreview" style="margin-bottom:14px;">
+        <span class="preview-empty">Pilih produk untuk melihat detail harga</span>
+      </div>
+
+      <!-- Add row -->
+      <div class="add-row">
+        <div class="field-group">
+          <label>Produk dipilih</label>
+          <input type="text" id="selectedName" placeholder="—" readonly style="background:#f1f5f9; border-color:var(--border); color:var(--muted); cursor:default;">
+        </div>
+        <div class="field-group">
+          <label>Qty</label>
+          <input type="number" id="qty" value="1" min="1" placeholder="1" inputmode="numeric">
+        </div>
+        <div class="field-group">
+          <label>Diskon</label>
+          <div class="disc-input-wrap">
+            <input type="number" id="discItem" value="0" min="0" max="100" placeholder="0">
+          </div>
+        </div>
+        <div class="field-group">
+          <label>&nbsp;</label>
+          <button class="btn-add" onclick="addToCart()">+ Tambah</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Mobile total bar -->
+    <div class="mobile-total-bar" id="mobileTotalBar">
+      <span class="mtb-label">Total</span>
+      <span class="mtb-val" id="mobileTotalVal">Rp 0</span>
+    </div>
+
+    <!-- Cart -->
+    <div class="card" style="flex:1;">
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+        <p class="section-label" style="margin-bottom:0;">Keranjang Belanja</p>
+        <span id="cartCount" style="font-family:var(--mono); font-size:0.75rem; color:var(--muted);">0 item</span>
+      </div>
+      <div id="outletChip" style="display:none; margin-bottom:10px; padding:8px 12px; background:#eff6ff; border:1px solid #bfdbfe; border-radius:8px; font-size:0.75rem; color:#1e40af; font-family:var(--mono); display:flex; align-items:center; gap:8px; flex-wrap:wrap;">
+        <span style="color:var(--muted);">🏪</span>
+        <span id="outletChipText" style="flex:1;"></span>
+      </div>
+      <div class="cart-wrap" id="cartWrap">
+        <table id="cartTable">
+          <thead>
+            <tr>
+              <th style="width:40%;">Produk</th>
+              <th class="num">Harga Satuan</th>
+              <th class="num">Disc</th>
+              <th style="text-align:center; width:90px;">Qty</th>
+              <th class="num">Subtotal</th>
+              <th style="text-align:center;">Del</th>
+            </tr>
+          </thead>
+          <tbody id="cartBody">
+            <tr><td colspan="6">
+              <div class="empty-cart">
+                <div class="icon">🛒</div>
+                <p>Belum ada produk ditambahkan</p>
+              </div>
+            </td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right-panel">
+
+    <!-- Outlet / User Info -->
+    <div class="card">
+      <p class="section-label" style="margin-bottom:12px;">Info Outlet / Pelanggan</p>
+      <div style="display:flex; flex-direction:column; gap:10px;">
+        <div class="field-group">
+          <label>Nama Outlet / Pelanggan</label>
+          <input type="text" id="infoNama" placeholder="Contoh: Apotek Sehat / Dr. Anisa" oninput="updateOutletChip()" style="width:100%; padding:11px 14px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--mono); font-size:0.82rem; outline:none;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field-group">
+          <label>Catatan</label>
+          <textarea id="infoCatatan" placeholder="Catatan tambahan (opsional)" rows="2" style="width:100%; padding:11px 14px; background:var(--bg); border:1px solid var(--border); border-radius:10px; color:var(--text); font-family:var(--mono); font-size:0.82rem; outline:none; resize:vertical; line-height:1.5;" onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"></textarea>
+        </div>
+      </div>
+    </div>
+
+    <!-- Summary -->
+    <div class="card">
+      <p class="section-label" style="margin-bottom:14px;">Ringkasan Transaksi</p>
+
+      <div class="summary-rows">
+        <div class="summary-row">
+          <span class="summary-label">Subtotal</span>
+          <span class="summary-val" id="sumSubtotal">Rp 0</span>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Diskon Item</span>
+          <span class="summary-val" style="color:#fca5a5;" id="sumDiscItems">— Rp 0</span>
+        </div>
+        <div class="summary-row" style="padding-bottom:12px;">
+          <span class="summary-label" style="font-size:0.8rem; color:var(--text);">Diskon Tambahan</span>
+          <div class="global-disc-row">
+            <div class="disc-input-wrap" style="width:90px;">
+              <input type="number" id="globalDisc" value="0" min="0" max="100" placeholder="0" oninput="recalc()">
+            </div>
+          </div>
+        </div>
+        <div class="summary-row">
+          <span class="summary-label">Potongan Tambahan</span>
+          <span class="summary-val" style="color:#fca5a5;" id="sumGlobalDisc">— Rp 0</span>
+        </div>
+        <div class="summary-row total">
+          <span class="summary-label">TOTAL</span>
+          <span class="summary-val" id="sumTotal">Rp 0</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Payment -->
+    <div class="card">
+      <p class="section-label" style="margin-bottom:12px;">Pembayaran</p>
+      <div class="payment-section">
+        <div class="field-group">
+          <label>Uang Diterima</label>
+          <div class="bayar-input-wrap">
+            <span class="bayar-prefix">Rp</span>
+            <input type="number" id="bayar" placeholder="0" oninput="recalc()" inputmode="numeric">
+          </div>
+        </div>
+
+        <!-- Quick amounts -->
+        <div style="display:flex; gap:6px; flex-wrap:wrap;">
+          <button onclick="setQuickBayar(50000)" style="flex:1; padding:7px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'">50K</button>
+          <button onclick="setQuickBayar(100000)" style="flex:1; padding:7px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'">100K</button>
+          <button onclick="setQuickBayar(200000)" style="flex:1; padding:7px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'">200K</button>
+          <button onclick="setQuickBayar(500000)" style="flex:1; padding:7px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent)'; this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'">500K</button>
+          <button onclick="setExact()" style="flex:1; padding:7px; background:#f1f5f9; border:1px solid var(--border); border-radius:8px; color:var(--muted); font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.15s;" onmouseover="this.style.borderColor='var(--accent2)'; this.style.color='var(--text)'" onmouseout="this.style.borderColor='var(--border)'; this.style.color='var(--muted)'">PAS</button>
+        </div>
+
+        <div id="kembalianBox" style="display:none;"></div>
+
+        <button class="btn-bayar" onclick="prosesTransaksi()">⚡ Proses Transaksi</button>
+        <button class="btn-clear" onclick="clearAll()">🗑 Hapus Semua</button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Receipt Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="receipt" id="receipt">
+    <div class="receipt-header">
+      <h2>💊 SDM PHARMA</h2>
+      <p>Struk Transaksi</p>
+      <p id="receiptDate" style="margin-top:4px;">—</p>
+    </div>
+    <div id="receiptOutlet"></div>
+    <div id="receiptItems"></div>
+    <div class="receipt-div"></div>
+    <div id="receiptSummary"></div>
+    <div class="receipt-footer">
+      Terima kasih atas kepercayaan Anda<br>
+      — SDM Pharma —
+    </div>
+    <button class="btn-close-receipt" onclick="closeReceipt()">Tutup Struk</button>
+  </div>
+</div>
+
+<script>
+// ========== DATA ==========
+const products = {
+  klinik: [
+    {name:"CARMED CRM 10%", komposisi:"UREA 10%", kemasan:"TUBE 40 GR", hna:32500, ppn:36075},
+    {name:"CARMED CRM 20%", komposisi:"UREA 20%", kemasan:"TUBE 40 GR", hna:41185, ppn:45715},
+    {name:"DEPIGMEN SOL", komposisi:"MEQUINOL 2% + TRETINOIN 0.01%", kemasan:"BOTOL 30 ML", hna:64000, ppn:71040},
+    {name:"DESOLEX CRM", komposisi:"DESONIDE 0,05%", kemasan:"TUBE 10 GR", hna:27500, ppn:30525},
+    {name:"DESOLEX OINT", komposisi:"DESONIDE 0,05%", kemasan:"TUBE 10 GR", hna:27000, ppn:29970},
+    {name:"DESOLEX SOL 30", komposisi:"DESONIDE 0,05%", kemasan:"BOTOL 30 ML", hna:58700, ppn:65157},
+    {name:"DESOLEX-N", komposisi:"DESONIDE 0,05% + NEOMYCIN 0,5%", kemasan:"TUBE 10 GR", hna:34500, ppn:38295},
+    {name:"KETOMED CRM", komposisi:"KETOCONAZOLE 2%", kemasan:"TUBE 15 GR", hna:28730, ppn:31890},
+    {name:"KETOMED GEL", komposisi:"KETOCONAZOLE 2%", kemasan:"TUBE 15 GR", hna:28730, ppn:31890},
+    {name:"KETOMED SS", komposisi:"KETOCONAZOLE 2%", kemasan:"BOTOL 60 ML", hna:46900, ppn:52059},
+    {name:"KLODERMA CRM 15", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 15 GR", hna:52000, ppn:57720},
+    {name:"KLODERMA CRM 10", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 10 GR", hna:36500, ppn:40515},
+    {name:"KLODERMA CRM 5", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 5 GR", hna:24200, ppn:26862},
+    {name:"KLODERMA GEL", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 5 GR", hna:24200, ppn:26862},
+    {name:"KLODERMA OINT 10", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 10 GR", hna:36500, ppn:40515},
+    {name:"KLODERMA OINT 5", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"TUBE 5 GR", hna:24200, ppn:26862},
+    {name:"KLODERMA LOTION", komposisi:"KLOBETASOL PROPIONAT 0,05%", kemasan:"BOTOL 30 ML", hna:78800, ppn:87468},
+    {name:"MEDICORT CRM 10", komposisi:"FLUTICASONE PROPIONATE 0.05%", kemasan:"TUBE 10 GR", hna:64000, ppn:71040},
+    {name:"MEDICORT CRM 5", komposisi:"FLUTICASONE PROPIONATE 0.05%", kemasan:"TUBE 5 GR", hna:38100, ppn:42291},
+    {name:"MEDSCAB CRM", komposisi:"PERMETHRIN 5%", kemasan:"TUBE 30 GR", hna:72100, ppn:80031},
+    {name:"MEDSCAB BLACK SOAP BAR", komposisi:"SULFUR 10%, CHARCOAL POWDER, TEA TREE OIL", kemasan:"SOAP BAR 60 GR", hna:19500, ppn:21645},
+    {name:"MEDSCAB LOTION", komposisi:"PERMETHRIN 5%", kemasan:"BOTOL 30 GR", hna:70200, ppn:77922},
+    {name:"MOFACORT CRM 10", komposisi:"MOMETASONE FUROATE 0,1%", kemasan:"TUBE 10 GR", hna:77000, ppn:85470},
+    {name:"MOFACORT CRM 5", komposisi:"MOMETASONE FUROATE 0,1%", kemasan:"TUBE 5 GR", hna:40300, ppn:44733},
+    {name:"MOFACORT OINT 10", komposisi:"MOMETASONE FUROATE 0,1%", kemasan:"TUBE 10 GR", hna:77000, ppn:85470},
+    {name:"PIROTOP CRM 10", komposisi:"MUPIROCIN 2%", kemasan:"TUBE 10 GR", hna:68900, ppn:76479},
+    {name:"PIROTOP CRM 5", komposisi:"MUPIROCIN 2%", kemasan:"TUBE 5 GR", hna:41600, ppn:46176},
+    {name:"PIROTOP OINT 10", komposisi:"MUPIROCIN 2%", kemasan:"TUBE 10 GR", hna:69000, ppn:76590},
+    {name:"SAGALON", komposisi:"DOXEPIN HYDROCHLORIDE 5%", kemasan:"TUBE 10 GR", hna:44500, ppn:49395},
+    {name:"SUREVIT D3 1.000 IU", komposisi:"VITAMIN D3 CHOLECALCIFEROL", kemasan:"BOX 30 TABLET", hna:50000, ppn:55500},
+    {name:"SORALEN SOLUTION", komposisi:"METHOXSALEN 1%", kemasan:"BOTOL 15 ML", hna:58200, ppn:64602},
+    {name:"TEKASOL OINT", komposisi:"CENTELA ASIATICA 1%", kemasan:"TUBE 10 GR", hna:40950, ppn:45455},
+    {name:"TEKASOL PLUS CREAM", komposisi:"ALLIUM CEPA BULB EXTRA, ASIATICOSIDE, MADECASSIC ACID", kemasan:"TUBE 10 GR", hna:62000, ppn:68820},
+    {name:"TOPICARE BABY LOTION", komposisi:"CENTELLA ASIATICA EXT, POLYGONUM ROOT EXT", kemasan:"TUBE 100 GR", hna:81497, ppn:90462},
+    {name:"TOPICARE BODY WASH", komposisi:"CENTELLA ASIATICA EXT, POLYGONUM ROOT EXT", kemasan:"TUBE 100 ML", hna:61263, ppn:68002},
+    {name:"TOPICARE + CERAMIDE CRM", komposisi:"PLUKENETIA VOLUBILIS SEED OIL, HYALURONIC ACID, CERAMIDE", kemasan:"TUBE 100 GR", hna:146450, ppn:162560},
+    {name:"TOPICARE CLEANSER", komposisi:"SODIUM LACTATE, SODIUM GLUCONATE, PANTHENOL", kemasan:"BOTOL 90 ML", hna:65450, ppn:72650},
+    {name:"TOPICARE DIAPER CREAM", komposisi:"ZINC OXYDE, PANTHENOL, GLYCERIN", kemasan:"TUBE 50 GR", hna:55000, ppn:61050},
+    {name:"TOPICARE SOOTHING CRM", komposisi:"PLUKENETIA VOLUBILIS SEED OIL, HYALURONIC ACID", kemasan:"TUBE 30 GR", hna:72050, ppn:79976},
+  ],
+  estetika1: [
+    {name:"BENZOLAC CL", komposisi:"B.P 5% + CLINDAMYCIN 1,2%", kemasan:"TUBE 10 GR", hna:33600, ppn:37296},
+    {name:"BENZOLAC 2.5", komposisi:"BENZOIL PEROKSIDE 2,5%", kemasan:"TUBE 5 GR", hna:15400, ppn:17094},
+    {name:"BENZOLAC 5", komposisi:"BENZOIL PEROKSIDE 5%", kemasan:"TUBE 5 GR", hna:21200, ppn:23532},
+    {name:"BENZOPALEN GEL", komposisi:"BENZOIL PEROKSIDE 2,5% + ADAPALENE 0.1%", kemasan:"TUBE 10 GR", hna:82700, ppn:91797},
+    {name:"ERYMED CRM", komposisi:"ERYTHROMYCIN 2%", kemasan:"TUBE 20 GR", hna:34800, ppn:38628},
+    {name:"ERYMED GEL 15GR", komposisi:"ERYTHROMYCIN 2%", kemasan:"TUBE 15 GR", hna:31600, ppn:35076},
+    {name:"ERYMED GEL 10GR", komposisi:"ERYTHROMYCIN 2%", kemasan:"TUBE 10 GR", hna:25400, ppn:28194},
+    {name:"ERYMED PLUS", komposisi:"ERYTH 4% + TRETINOIN 0.025%", kemasan:"TUBE 30 ML", hna:53900, ppn:59829},
+    {name:"ERYMED SOL", komposisi:"ERYTHROMYCIN 2%", kemasan:"BOTOL 30 ML", hna:37200, ppn:41292},
+    {name:"GLUXANTHIN-C", komposisi:"GLUTANTHIONE 500mg, ASTAXANTHIN 3mg, ASCORBIC ACID 125mg", kemasan:"BOX 5 STRIP @ 4 KAPLET", hna:275000, ppn:305250},
+    {name:"HELIATECH SPF 45+", komposisi:"OCTYL METHOXYCINNAMATE, NIACINAMIDE, TOCOPHERYL ACETATE", kemasan:"TUBE 30 ML", hna:79800, ppn:88578},
+    {name:"LITRAMED", komposisi:"LIDOCAINE 7%, TETRACAINE 7%", kemasan:"TUBE 25 GR", hna:205000, ppn:227550},
+    {name:"MEDIKLIN GEL 15", komposisi:"CLYNDAMYCIN PHOSPHATE 1,2%", kemasan:"TUBE 15 GR", hna:27200, ppn:30192},
+    {name:"MEDIKLIN GEL 10", komposisi:"CLYNDAMYCIN PHOSPHATE 1,2%", kemasan:"TUBE 10 GR", hna:22000, ppn:24420},
+    {name:"MEDIKLIN SOL", komposisi:"CLYNDAMYCIN PHOSPHATE 1,2%", kemasan:"BOTOL 30 ML", hna:52600, ppn:58386},
+    {name:"MEDIKLIN TR", komposisi:"CLINDA. 1,2% + TRETINOIN 0,025%", kemasan:"TUBE 15 GR", hna:47800, ppn:53058},
+    {name:"MELANOX ES", komposisi:"RHUMEX OCCIDENTALIS EXTRACT, KOJIC ACID", kemasan:"TUBE 15 GR", hna:65856, ppn:73100},
+    {name:"NIACEF GEL", komposisi:"NICOTINAMIDE 4%", kemasan:"TUBE 15 GR", hna:31600, ppn:35076},
+    {name:"PALENOX GEL", komposisi:"ADAPALENE 0.1%", kemasan:"TUBE 15 GR", hna:62200, ppn:69042},
+    {name:"REFAQUIN 15GR", komposisi:"HDQ. 4% + TRET 0.05% + FLUOCINOLONE A. 0.01%", kemasan:"TUBE 15 GR", hna:72300, ppn:80253},
+    {name:"REFAQUIN 10GR", komposisi:"HDQ. 4% + TRET 0.05% + FLUOCINOLONE A. 0.01%", kemasan:"TUBE 10 GR", hna:49100, ppn:54501},
+    {name:"REGROU", komposisi:"MINOXIDIL 2%", kemasan:"BOTOL 30 ML", hna:71500, ppn:79365},
+    {name:"REGROU FORTE", komposisi:"MINOXIDIL 5%", kemasan:"BOTOL 30 ML", hna:119600, ppn:132756},
+    {name:"VITACID CRM 0.025%", komposisi:"TRETINOIN 0,025%", kemasan:"TUBE 15 GR", hna:27800, ppn:30858},
+    {name:"VITACID CRM 0.05%", komposisi:"TRETINOIN 0,05%", kemasan:"TUBE 20 GR", hna:40200, ppn:44622},
+    {name:"VITACID CRM 0.1%", komposisi:"TRETINOIN 0,1%", kemasan:"TUBE 20 GR", hna:50700, ppn:56277},
+    {name:"VITACID GEL 0.1%", komposisi:"TRETINOIN 0,1%", kemasan:"TUBE 20 GR", hna:75000, ppn:83250},
+    {name:"VITACID GEL 0.05%", komposisi:"TRETINOIN 0,05%", kemasan:"TUBE 20 GR", hna:59000, ppn:65490},
+    {name:"VITACID GEL 0.025%", komposisi:"TRETINOIN 0,025%", kemasan:"TUBE 20 GR", hna:27800, ppn:30858},
+    {name:"VITACID SOL 0.05%", komposisi:"TRETINOIN 0,05%", kemasan:"TUBE 50 ML", hna:57200, ppn:63492},
+    {name:"VITAQUIN 4%", komposisi:"HIDROQUINON 4%", kemasan:"TUBE 15 GR", hna:37100, ppn:41181},
+  ],
+  estetika2: [
+    {name:"ESDEE GEL NIACINAMIDE 15GR", komposisi:"NIACINAMIDE", kemasan:"TUBE 15 GR", hna:37300, ppn:41403},
+    {name:"ESDEE GEL NIACINAMIDE 1KG", komposisi:"NIACINAMIDE", kemasan:"POT 1000 GR", hna:1926500, ppn:2138415},
+    {name:"ESDEE GEL NIACINAMIDE 10KG", komposisi:"NIACINAMIDE", kemasan:"POT 10 KG", hna:19190800, ppn:21301788},
+    {name:"ESDEE GEL PLUS", komposisi:"NIACINAMIDE, ZINC", kemasan:"TUBE 15 GR", hna:40000, ppn:44400},
+    {name:"GLIKODERM 10%", komposisi:"GLYCOLIC ACID 10%", kemasan:"POT 20 GR", hna:37838, ppn:42000},
+    {name:"GLIKODERM 10% 500GR", komposisi:"GLYCOLIC ACID 10%", kemasan:"POT 500 GR", hna:910000, ppn:1010100},
+    {name:"GLIKODERM 4%", komposisi:"GLYCOLIC ACID 4%", kemasan:"TUBE 20 GR", hna:25000, ppn:27750},
+    {name:"GLIKODERM 8%", komposisi:"GLYCOLIC ACID 8%", kemasan:"POT 20 GR", hna:33964, ppn:37700},
+    {name:"GLIKODERM 8% 500GR", komposisi:"GLYCOLIC ACID 8%", kemasan:"POT 500 GR", hna:820000, ppn:910200},
+    {name:"GLIKODERM 8% MOISTURIZING", komposisi:"GLUCONOLACTONE 8%", kemasan:"POT 20 GR", hna:20000, ppn:22200},
+    {name:"GLIKODERM 8% MOISTURIZING 500GR", komposisi:"GLUCONOLACTONE 8%", kemasan:"POT 500 GR", hna:300000, ppn:333000},
+    {name:"GLIKODERM CLARIFYING FC GEL", komposisi:"SODIUM LAURETH SULFATE, PANTHENOL", kemasan:"BOTOL 100 ML", hna:25946, ppn:28800},
+    {name:"GLIKODERM CLARIFYING FC GEL 1000ML", komposisi:"SODIUM LAURETH SULFATE, PANTHENOL", kemasan:"BOTOL 1000 ML", hna:240000, ppn:266400},
+    {name:"GLIKODERM CLARIFYING FC WITH GA 2%", komposisi:"GLYCOLIC ACID 2%", kemasan:"BOTOL 100 ML", hna:42700, ppn:47397},
+    {name:"GLIKODERM CLARIFYING FC WITH GA 4%", komposisi:"GLYCOLIC ACID 4%", kemasan:"BOTOL 100 ML", hna:60900, ppn:67599},
+    {name:"GLIKODERM CLARIFYING FC WITH PHA 4%", komposisi:"POLYHYDROXY ACID 4%", kemasan:"BOTOL 100 ML", hna:31712, ppn:35200},
+    {name:"GLIKODERM CLARIFYING FC WITH PHA 4% 1L", komposisi:"POLYHYDROXY ACID 4%", kemasan:"BOTOL 1000 ML", hna:300000, ppn:333000},
+    {name:"GLIKODERM MILK CLEANSER", komposisi:"MINERAL OIL, ISOPROPYL PALMITATE", kemasan:"BOTOL 100 ML", hna:21982, ppn:24400},
+    {name:"GLIKODERM MILK CLEANSER 1000ML", komposisi:"MINERAL OIL, ISOPROPYL PALMITATE", kemasan:"BOTOL 1000 ML", hna:193600, ppn:214896},
+    {name:"GLIKODERM MOISTURIZING", komposisi:"GLUCONOLACTONE 4%", kemasan:"POT 20 GR", hna:20000, ppn:22200},
+    {name:"GLIKODERM PEEL NEUTRALIZER", komposisi:"SODIUM BICARBONATE", kemasan:"BOTOL 200 ML", hna:85135, ppn:94500},
+    {name:"GLIKODERM REPAIR & CALMING CREAM", komposisi:"MASLINIC ACID, UREA, ALOE VERA, ALLANTOIN", kemasan:"TUBE 10 GR", hna:39190, ppn:43501},
+    {name:"GLIKODERM SKIN TONER + PHA 4%", komposisi:"GLUCONOLACTONE 4%, WITCH HAZEL, CHAMOMILE", kemasan:"BOTOL 100 ML", hna:20000, ppn:22200},
+    {name:"GLIKODERM SKIN TONER + PHA 4% 1L", komposisi:"GLUCONOLACTONE 4%, WITCH HAZEL, CHAMOMILE", kemasan:"BOTOL 1000 ML", hna:180000, ppn:199800},
+    {name:"GLIKODERM SOL 20%", komposisi:"GLYCOLIC ACID 20%", kemasan:"BOTOL 30 ML", hna:85586, ppn:95000},
+    {name:"GLIKODERM SOL 35%", komposisi:"GLYCOLIC ACID 35%", kemasan:"BOTOL 30 ML", hna:136400, ppn:151404},
+    {name:"GLIKODERM SOL 50%", komposisi:"GLYCOLIC ACID 50%", kemasan:"BOTOL 30 ML", hna:204500, ppn:226995},
+    {name:"GLIKODERM SOL 70%", komposisi:"GLYCOLIC ACID 70%", kemasan:"BOTOL 30 ML", hna:286400, ppn:317904},
+    {name:"HYALUDERM CREAM", komposisi:"HYALURONIC ACID", kemasan:"POT 15 GR", hna:93500, ppn:103785},
+    {name:"HYALUDERM SERUM", komposisi:"HYALURONIC ACID", kemasan:"BOTOL 15 ML", hna:99000, ppn:109890},
+    {name:"LUMINEUX MILK CLEANSER", komposisi:"NIACINAMIDE", kemasan:"BOTOL 100 ML", hna:37000, ppn:41070},
+    {name:"LUMINEUX PURIFYING FACIAL FOAM", komposisi:"SALICYLIC ACID, PANTHENOL", kemasan:"BOTOL 50 ML", hna:83750, ppn:92963},
+    {name:"LUMINEUX PURIFYING FACIAL WASH", komposisi:"SALICYLIC ACID, GLUCONOLACTONE", kemasan:"BOTOL 100 ML", hna:69000, ppn:76590},
+    {name:"LUMINEUX WHITENING CREAM", komposisi:"TRANEXAMIC ACID, ALPHA ARBUTIN, NIACINAMIDE", kemasan:"TUBE 12 GR", hna:62612, ppn:69499},
+    {name:"LUMINEUX ESSENCE TONER", komposisi:"ASAM SALISILAT, WITCH HAZEL, CHAMOMILE WATER", kemasan:"BOTOL 60 ML", hna:28000, ppn:31080},
+    {name:"PARASOL CREAM 500GR", komposisi:"OCTYL METHOXYCINNAMATE, BENZOPHENONE-3, TITANIUM DIOXIDA, VITAMIN E", kemasan:"POT 500 GR", hna:925000, ppn:1026750},
+    {name:"PARASOL CREAM SPF 33 500GR", komposisi:"OCTYL METHOXYCINNAMATE, SPF 33", kemasan:"POT 500 GR", hna:1300000, ppn:1443000},
+    {name:"PARASOL CREAM SPF 33", komposisi:"OCTYL METHOXYCINNAMATE, SPF 33", kemasan:"TUBE 20 GR", hna:54054, ppn:60000},
+    {name:"PARASOL CREAM SPF 33 WITH GLUC. 4%", komposisi:"OCTYL METHOXYCINNAMATE, GLUCONOLACTONE, SPF 33", kemasan:"TUBE 20 GR", hna:57300, ppn:63603},
+    {name:"PARASOL CREAM STIKER", komposisi:"OCTYL METHOXYCINNAMATE, BENZOPHENONE-3", kemasan:"TUBE 20 GR", hna:40900, ppn:45399},
+    {name:"PARASOL CREAM WHITE", komposisi:"OCTYL METHOXYCINNAMATE, METHYL BENZILIDENE CAMPHOR", kemasan:"TUBE 20 GR", hna:40900, ppn:45399},
+    {name:"PARASOL CREAM WHITE 500GR", komposisi:"OCTYL METHOXYCINNAMATE, METHYL BENZILIDENE CAMPHOR", kemasan:"POT 500 GR", hna:925000, ppn:1026750},
+    {name:"PARASOL CREAM WHITE SPF 33", komposisi:"OCTYL METHOXYCINNAMATE, SPF 33", kemasan:"TUBE 20 GR", hna:54500, ppn:60495},
+    {name:"PARASOL CREAM WHITE SPF 33 500GR", komposisi:"OCTYL METHOXYCINNAMATE, SPF 33", kemasan:"POT 500 GR", hna:1300000, ppn:1443000},
+    {name:"PARASOL CREAM WHITE SPF 33 WITH GLUC. 4%", komposisi:"OCTYL METHOXYCINNAMATE, GLUCONOLACTONE", kemasan:"TUBE 20 GR", hna:60900, ppn:67599},
+    {name:"PARASOL GEL", komposisi:"OCTYL METHOXYCINNAMATE, BENZOPHENONE-3", kemasan:"TUBE 20 GR", hna:21622, ppn:24000},
+    {name:"PARASOL GEL 500GR", komposisi:"OCTYL METHOXYCINNAMATE, BENZOPHENONE-3", kemasan:"POT 500 GR", hna:470000, ppn:521700},
+    {name:"SKIN BRIGHT ANTI AGING GOLD SERUM", komposisi:"ACETYL HEXAPEPTIDE-8, COLLOIDAL GOLD", kemasan:"BOTOL 15 GR", hna:112500, ppn:124875},
+    {name:"SKIN BRIGHT EYE SERUM", komposisi:"CHRYSANTHELLUM INDICUM EXCT, ACETYL HEXAPEPTIDE-8", kemasan:"TUBE 12 GR", hna:54054, ppn:60000},
+    {name:"SKIN BRIGHT LOOSE POWDER OILY SKIN", komposisi:"NATURAL SALICYLIC ACID", kemasan:"POT 10 GR", hna:50000, ppn:55500},
+    {name:"SKIN BRIGHT LOOSE POWDER LIGHTENING", komposisi:"NATURAL NIACINAMIDE", kemasan:"POT 10 GR", hna:50000, ppn:55500},
+    {name:"SKIN BRIGHT LIP TREATMENT", komposisi:"AVOCADO OIL, SQUALANE, PALMITOYL TRIPEPTIDE-38", kemasan:"TUBE 12 GR", hna:79100, ppn:87801},
+    {name:"SKIN BRIGHT LIGHTENING CC CREAM NATURAL", komposisi:"TIO2, ARBUTIN, GLUTATHIONE", kemasan:"TUBE 15 GR", hna:61261, ppn:68000},
+    {name:"SKIN BRIGHT LIGHTENING CC CREAM BEIGE", komposisi:"TIO2, ARBUTIN, GLUTATHIONE", kemasan:"TUBE 15 GR", hna:61261, ppn:68000},
+    {name:"SKIN BRIGHT CC CREAM OILY SKIN NATURAL", komposisi:"TIO2, SALIX ALBA, SCUTELARIA BAICALENSIS", kemasan:"TUBE 15 GR", hna:61261, ppn:68000},
+    {name:"SKIN BRIGHT CC CREAM OILY SKIN BEIGE", komposisi:"TIO2, SALIX ALBA, SCUTELARIA BAICALENSIS", kemasan:"TUBE 15 GR", hna:61261, ppn:68000},
+    {name:"SKIN BRIGHT FIRMING LOTION", komposisi:"LACTIC ACID, SQUALANE, KOJIC DIPALMITATE, RETINOL", kemasan:"BOTOL 15 GR", hna:93500, ppn:103785},
+  ],
+  other: [
+    {name:"VITAQUIN CRM 2%", komposisi:"HIDROQUINON 2%", kemasan:"TUBE 15 GR", hna:32400, ppn:35964},
+    {name:"VITAQUIN CRM 5%", komposisi:"HDQ. 5% + SUN SCREEN", kemasan:"TUBE 15 GR", hna:68300, ppn:75813},
+  ]
+};
+
+// ========== STATE ==========
+let priceType = 'hna';
+let currentCategory = 'all';
+let selectedProduct = null;
+let cart = [];
+let txNo = 1;
+
+// ========== INIT ==========
+function init() {
+  updateDate();
+  setInterval(updateDate, 60000);
+  renderSelect();
+}
+
+function updateDate() {
+  const now = new Date();
+  document.getElementById('dateNow').textContent = now.toLocaleDateString('id-ID', {weekday:'short', day:'2-digit', month:'short', year:'numeric'}) + ' · ' + now.toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'});
+}
+
+function fmt(n) {
+  return 'Rp ' + Math.round(n).toLocaleString('id-ID');
+}
+
+// ========== PRICE TYPE ==========
+function setPriceType(type) {
+  priceType = type;
+  document.getElementById('btnHNA').classList.toggle('active', type === 'hna');
+  document.getElementById('btnPPN').classList.toggle('active', type === 'ppn');
+  const badge = document.getElementById('priceTypeBadge');
+  badge.textContent = type === 'hna' ? 'HNA' : 'HNA + PPN';
+  badge.className = 'ppn-badge ' + (type === 'hna' ? 'hna' : 'ppn');
+  if (selectedProduct) onProductChange();
+  renderCart();
+  recalc();
+}
+
+// ========== CATEGORY ==========
+function setCategory(cat) {
+  currentCategory = cat;
+  ['all','klinik','estetika1','estetika2','other'].forEach(c => {
+    document.getElementById('tab-'+c).classList.toggle('active', c === cat);
+  });
+  renderSelect();
+  selectedProduct = null;
+  document.getElementById('selectedName').value = '';
+  resetPreview();
+}
+
+// ========== SELECT ==========
+function renderSelect() {
+  const sel = document.getElementById('productSelect');
+  sel.innerHTML = '<option value="">— Pilih Produk —</option>';
+
+  const cats = currentCategory === 'all'
+    ? ['klinik','estetika1','estetika2','other']
+    : [currentCategory];
+
+  const labels = {klinik:'Derma Klinik', estetika1:'Derma Estetika 1', estetika2:'Derma Estetika 2', other:'Other'};
+
+  cats.forEach(cat => {
+    if (currentCategory === 'all') {
+      const og = document.createElement('optgroup');
+      og.label = '── ' + labels[cat] + ' ──';
+      products[cat].forEach((p, i) => {
+        const o = document.createElement('option');
+        o.value = cat + '::' + i;
+        o.textContent = p.name + ' · ' + p.kemasan;
+        og.appendChild(o);
+      });
+      sel.appendChild(og);
+    } else {
+      products[cat].forEach((p, i) => {
+        const o = document.createElement('option');
+        o.value = cat + '::' + i;
+        o.textContent = p.name + ' · ' + p.kemasan;
+        sel.appendChild(o);
+      });
+    }
+  });
+}
+
+function onProductChange() {
+  const val = document.getElementById('productSelect').value;
+  if (!val) { selectedProduct = null; resetPreview(); document.getElementById('selectedName').value = ''; return; }
+  const [cat, idx] = val.split('::');
+  selectedProduct = { ...products[cat][parseInt(idx)], cat };
+  document.getElementById('selectedName').value = selectedProduct.name;
+  renderPreview();
+}
+
+function resetPreview() {
+  document.getElementById('productPreview').innerHTML = '<span class="preview-empty">Pilih produk untuk melihat detail harga</span>';
+}
+
+function renderPreview() {
+  if (!selectedProduct) return;
+  const p = selectedProduct;
+  const price = priceType === 'hna' ? p.hna : p.ppn;
+  const catLabel = {klinik:'Derma Klinik', estetika1:'Estetika 1', estetika2:'Estetika 2', other:'Other'};
+  document.getElementById('productPreview').innerHTML = `
+    <div class="preview-dot ${p.cat}"></div>
+    <div style="flex:1;">
+      <span class="cat-pill ${p.cat}">${catLabel[p.cat]}</span>
+      <div class="preview-name">${p.name}</div>
+      <div class="td-sub">${p.komposisi} · ${p.kemasan}</div>
+    </div>
+    <div class="preview-price">${fmt(price)}</div>
+  `;
+}
+
+// ========== CART ==========
+function addToCart() {
+  if (!selectedProduct) { alert('Pilih produk terlebih dahulu!'); return; }
+  const qty = parseInt(document.getElementById('qty').value) || 1;
+  const disc = parseFloat(document.getElementById('discItem').value) || 0;
+  if (qty < 1) { alert('Qty minimal 1'); return; }
+  if (disc < 0 || disc > 100) { alert('Diskon harus 0-100%'); return; }
+
+  // Check duplicate
+  const existing = cart.find(c => c.name === selectedProduct.name && c.disc === disc);
+  if (existing) {
+    existing.qty += qty;
+  } else {
+    cart.push({
+      name: selectedProduct.name,
+      komposisi: selectedProduct.komposisi,
+      kemasan: selectedProduct.kemasan,
+      cat: selectedProduct.cat,
+      hna: selectedProduct.hna,
+      ppn: selectedProduct.ppn,
+      priceTypeSnapshot: priceType,
+      qty,
+      disc
+    });
+  }
+
+  renderCart();
+  recalc();
+
+  // Reset
+  document.getElementById('qty').value = 1;
+  document.getElementById('discItem').value = 0;
+}
+
+function isMobile() { return window.innerWidth <= 900; }
+
+function renderCart() {
+  const tbody = document.getElementById('cartBody');
+  const totalItems = cart.reduce((s, c) => s + c.qty, 0);
+
+  // Update badge
+  const badge = document.getElementById('cartBadge');
+  if (totalItems > 0) { badge.style.display = 'flex'; badge.textContent = totalItems; }
+  else { badge.style.display = 'none'; }
+
+  if (cart.length === 0) {
+    document.getElementById('cartCount').textContent = '0 item';
+    if (isMobile()) {
+      tbody.innerHTML = `<tr><td><div class="empty-cart"><div class="icon">🛒</div><p>Belum ada produk ditambahkan</p></div></td></tr>`;
+    } else {
+      tbody.innerHTML = `<tr><td colspan="6"><div class="empty-cart"><div class="icon">🛒</div><p>Belum ada produk ditambahkan</p></div></td></tr>`;
+    }
+    return;
+  }
+
+  const catLabel = {klinik:'Derma Klinik', estetika1:'Estetika 1', estetika2:'Estetika 2', other:'Other'};
+  document.getElementById('cartCount').textContent = cart.length + ' produk · ' + totalItems + ' item';
+
+  if (isMobile()) {
+    // Mobile: card-style rows
+    tbody.innerHTML = cart.map((item, i) => {
+      const price = priceType === 'hna' ? item.hna : item.ppn;
+      const discAmt = price * item.disc / 100;
+      const priceAfterDisc = price - discAmt;
+      const subtotal = priceAfterDisc * item.qty;
+      const ptSnap = item.priceTypeSnapshot || priceType;
+      const ptBadge = ptSnap === 'hna'
+        ? `<span style="display:inline-flex;align-items:center;gap:3px;background:#fef3c7;color:#92400e;border-radius:5px;padding:1px 6px;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;font-family:var(--mono);">HNA</span>`
+        : `<span style="display:inline-flex;align-items:center;gap:3px;background:#dbeafe;color:#1d4ed8;border-radius:5px;padding:1px 6px;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;font-family:var(--mono);">HNA+PPN</span>`;
+      return `
+        <tr>
+          <td style="padding:0;">
+            <div style="display:flex; flex-direction:column; gap:6px; padding:2px 0;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px;">
+                    <span class="cat-pill ${item.cat}">${catLabel[item.cat]}</span>
+                    ${ptBadge}
+                  </div>
+                  <div class="td-name">${item.name}</div>
+                  <div class="td-sub">${item.kemasan}</div>
+                </div>
+                <button class="btn-del" onclick="removeItem(${i})" style="margin-left:8px; flex-shrink:0;">✕</button>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px;">
+                <div style="font-family:var(--mono); font-size:0.78rem; color:var(--muted);">
+                  ${fmt(price)}${item.disc > 0 ? ` <span class="disc-badge" style="margin-left:4px;">${item.disc}%</span> → <span style="color:var(--accent2);">${fmt(priceAfterDisc)}</span>` : ''}
+                </div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                  <div class="qty-ctrl">
+                    <button class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+                    <span class="qty-val">${item.qty}</span>
+                    <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+                  </div>
+                  <div style="font-family:var(--mono); font-size:0.88rem; font-weight:700; color:var(--accent2);">${fmt(subtotal)}</div>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      `;
+    }).join('');
+  } else {
+    // Desktop: table rows
+    tbody.innerHTML = cart.map((item, i) => {
+      const price = priceType === 'hna' ? item.hna : item.ppn;
+      const discAmt = price * item.disc / 100;
+      const priceAfterDisc = price - discAmt;
+      const subtotal = priceAfterDisc * item.qty;
+      const ptSnap = item.priceTypeSnapshot || priceType;
+      const ptBadge = ptSnap === 'hna'
+        ? `<span style="background:#fef3c7;color:#92400e;border-radius:5px;padding:1px 6px;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;font-family:var(--mono);vertical-align:middle;">HNA</span>`
+        : `<span style="background:#dbeafe;color:#1d4ed8;border-radius:5px;padding:1px 6px;font-size:0.6rem;font-weight:700;letter-spacing:0.06em;font-family:var(--mono);vertical-align:middle;">HNA+PPN</span>`;
+      return `
+        <tr>
+          <td>
+            <div style="display:flex;align-items:center;gap:5px;flex-wrap:wrap;margin-bottom:3px;">
+              <span class="cat-pill ${item.cat}">${catLabel[item.cat]}</span>
+              ${ptBadge}
+            </div>
+            <div class="td-name">${item.name}</div>
+            <div class="td-sub">${item.kemasan}</div>
+          </td>
+          <td class="td-num">
+            ${fmt(price)}
+            ${item.disc > 0 ? `<div style="color:var(--muted); font-size:0.68rem; text-decoration:line-through;">${fmt(price)}</div>` : ''}
+            ${item.disc > 0 ? `<div style="color:var(--accent2);">${fmt(priceAfterDisc)}</div>` : ''}
+          </td>
+          <td class="td-num">${item.disc > 0 ? `<span class="disc-badge">${item.disc}%</span>` : '—'}</td>
+          <td>
+            <div class="qty-ctrl">
+              <button class="qty-btn" onclick="changeQty(${i}, -1)">−</button>
+              <span class="qty-val">${item.qty}</span>
+              <button class="qty-btn" onclick="changeQty(${i}, 1)">+</button>
+            </div>
+          </td>
+          <td class="td-num" style="color:var(--accent2); font-weight:600;">${fmt(subtotal)}</td>
+          <td><button class="btn-del" onclick="removeItem(${i})">✕</button></td>
+        </tr>
+      `;
+    }).join('');
+  }
+}
+
+function changeQty(i, delta) {
+  cart[i].qty = Math.max(1, cart[i].qty + delta);
+  renderCart();
+  recalc();
+}
+
+function removeItem(i) {
+  cart.splice(i, 1);
+  renderCart();
+  recalc();
+}
+
+// ========== CALC ==========
+function recalc() {
+  let gross = 0;
+  let discItems = 0;
+
+  cart.forEach(item => {
+    const price = priceType === 'hna' ? item.hna : item.ppn;
+    const d = price * item.disc / 100;
+    gross += price * item.qty;
+    discItems += d * item.qty;
+  });
+
+  const afterItemDisc = gross - discItems;
+
+  const globalDiscPct = parseFloat(document.getElementById('globalDisc').value) || 0;
+  const globalDiscAmt = afterItemDisc * globalDiscPct / 100;
+  const total = afterItemDisc - globalDiscAmt;
+
+  document.getElementById('sumSubtotal').textContent = fmt(gross);
+  document.getElementById('sumDiscItems').textContent = '− ' + fmt(discItems);
+  document.getElementById('sumGlobalDisc').textContent = '− ' + fmt(globalDiscAmt);
+  document.getElementById('sumTotal').textContent = fmt(total);
+
+  // Mobile total bar
+  const mtv = document.getElementById('mobileTotalVal');
+  if (mtv) mtv.textContent = fmt(total);
+
+  const bayar = parseFloat(document.getElementById('bayar').value) || 0;
+  const kembalian = bayar - total;
+  const box = document.getElementById('kembalianBox');
+
+  if (bayar > 0) {
+    if (kembalian >= 0) {
+      box.style.display = 'block';
+      box.innerHTML = `<div class="kembalian-box"><span class="label">KEMBALIAN</span><span class="val">${fmt(kembalian)}</span></div>`;
+    } else {
+      box.style.display = 'block';
+      box.innerHTML = `<div class="kurang-box"><span class="label">KURANG</span><span class="val">${fmt(Math.abs(kembalian))}</span></div>`;
+    }
+  } else {
+    box.style.display = 'none';
+  }
+}
+
+function setQuickBayar(amount) {
+  document.getElementById('bayar').value = amount;
+  recalc();
+}
+
+function setExact() {
+  const totalEl = document.getElementById('sumTotal').textContent;
+  const num = parseInt(totalEl.replace(/[^0-9]/g,''));
+  document.getElementById('bayar').value = num;
+  recalc();
+}
+
+// ========== PROCESS ==========
+function prosesTransaksi() {
+  if (cart.length === 0) { alert('Keranjang masih kosong!'); return; }
+
+  let gross = 0, discItems = 0;
+  cart.forEach(item => {
+    const price = priceType === 'hna' ? item.hna : item.ppn;
+    const d = price * item.disc / 100;
+    gross += price * item.qty;
+    discItems += d * item.qty;
+  });
+  const afterItemDisc = gross - discItems;
+  const globalDiscPct = parseFloat(document.getElementById('globalDisc').value) || 0;
+  const globalDiscAmt = afterItemDisc * globalDiscPct / 100;
+  const total = afterItemDisc - globalDiscAmt;
+  const bayar = parseFloat(document.getElementById('bayar').value) || 0;
+
+  if (bayar < total) { alert('Uang diterima kurang!'); return; }
+
+  const kembalian = bayar - total;
+  const now = new Date();
+  const noTx = 'SDM-' + now.getFullYear() + String(now.getMonth()+1).padStart(2,'0') + String(now.getDate()).padStart(2,'0') + '-' + String(txNo++).padStart(4,'0');
+
+  // Build receipt — outlet info
+  document.getElementById('receiptDate').textContent = now.toLocaleDateString('id-ID', {weekday:'long', day:'2-digit', month:'long', year:'numeric'}) + ' ' + now.toLocaleTimeString('id-ID');
+
+  const nama = document.getElementById('infoNama').value.trim();
+  const catatan = document.getElementById('infoCatatan').value.trim();
+
+  let outletHtml = '';
+  if (nama) {
+    outletHtml += `<div style="background:#f9f9f9; border-radius:8px; padding:10px 12px; margin-bottom:10px; border:1px solid #eee;">`;
+    outletHtml += `<div style="font-weight:700; font-size:0.82rem; color:#111;">🏪 ${nama}</div>`;
+    outletHtml += `</div>`;
+  }
+  if (catatan) {
+    outletHtml += `<div style="background:#fffbeb; border:1px solid #fde68a; border-radius:7px; padding:8px 12px; margin-bottom:10px; font-size:0.72rem; color:#92400e;">📝 ${catatan}</div>`;
+  }
+  document.getElementById('receiptOutlet').innerHTML = outletHtml;
+
+  // Build receipt — items
+
+  let itemsHtml = `<div class="receipt-item" style="font-size:0.68rem; color:#666;"><span class="rname">No. Transaksi</span><span class="rval">${noTx}</span></div>
+  <div class="receipt-item" style="font-size:0.68rem; color:#666;"><span class="rname">Jenis Harga</span><span class="rval">${priceType === 'hna' ? 'HNA' : 'HNA + PPN'}</span></div>
+  <div class="receipt-div"></div>`;
+
+  cart.forEach(item => {
+    const price = priceType === 'hna' ? item.hna : item.ppn;
+    const priceAfterDisc = price * (1 - item.disc/100);
+    const sub = priceAfterDisc * item.qty;
+    itemsHtml += `<div class="receipt-item"><span class="rname">${item.name}<br><span style="font-size:0.65rem; color:#888;">${item.kemasan} × ${item.qty}${item.disc > 0 ? ` (disc ${item.disc}%)` : ''}</span></span><span class="rval">${fmt(sub)}</span></div>`;
+  });
+
+  document.getElementById('receiptItems').innerHTML = itemsHtml;
+
+  let summaryHtml = '';
+  if (discItems > 0) summaryHtml += `<div class="receipt-item"><span class="rname">Subtotal</span><span class="rval">${fmt(gross)}</span></div><div class="receipt-item"><span class="rname">Disc Item</span><span class="rval" style="color:#dc2626;">− ${fmt(discItems)}</span></div>`;
+  if (globalDiscAmt > 0) summaryHtml += `<div class="receipt-item"><span class="rname">Disc Tambahan (${globalDiscPct}%)</span><span class="rval" style="color:#dc2626;">− ${fmt(globalDiscAmt)}</span></div>`;
+  summaryHtml += `<div class="receipt-total"><span>TOTAL</span><span>${fmt(total)}</span></div>`;
+  summaryHtml += `<div class="receipt-item"><span class="rname">Bayar</span><span class="rval">${fmt(bayar)}</span></div>`;
+  summaryHtml += `<div class="receipt-kembalian"><span>Kembalian</span><span>${fmt(kembalian)}</span></div>`;
+
+  document.getElementById('receiptSummary').innerHTML = summaryHtml;
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeReceipt() {
+  document.getElementById('modalOverlay').classList.remove('show');
+  clearAll();
+}
+
+function clearAll() {
+  cart = [];
+  document.getElementById('bayar').value = '';
+  document.getElementById('globalDisc').value = 0;
+  document.getElementById('kembalianBox').style.display = 'none';
+  document.getElementById('infoNama').value = '';
+  document.getElementById('infoCatatan').value = '';
+  updateOutletChip();
+  renderCart();
+  recalc();
+}
+
+// ========== OUTLET CHIP ==========
+function updateOutletChip() {
+  const nama = document.getElementById('infoNama').value.trim();
+  const chip = document.getElementById('outletChip');
+  const chipText = document.getElementById('outletChipText');
+  if (nama) {
+    chipText.textContent = nama;
+    chip.style.display = 'flex';
+  } else {
+    chip.style.display = 'none';
+  }
+}
+
+// ========== MOBILE TAB ==========
+function mobileTab(tab) {
+  const leftPanel = document.querySelector('.left-panel');
+  const rightPanel = document.querySelector('.right-panel');
+  const btnProduk = document.getElementById('nav-produk');
+  const btnBayar = document.getElementById('nav-bayar');
+
+  if (tab === 'produk') {
+    leftPanel.style.display = 'flex';
+    rightPanel.classList.remove('mobile-active');
+    btnProduk.classList.add('active');
+    btnBayar.classList.remove('active');
+  } else {
+    leftPanel.style.display = 'none';
+    rightPanel.classList.add('mobile-active');
+    btnBayar.classList.add('active');
+    btnProduk.classList.remove('active');
+  }
+}
+
+window.addEventListener('resize', () => {
+  renderCart();
+  if (window.innerWidth > 900) {
+    document.querySelector('.left-panel').style.display = '';
+    document.querySelector('.right-panel').classList.remove('mobile-active');
+  }
+});
+
+init();
+</script>
+</body>
+</html>
