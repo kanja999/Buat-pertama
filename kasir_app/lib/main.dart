@@ -1,16 +1,7 @@
 import 'package:flutter/material.dart';
-import 'dart:ui_web' as ui;
-import 'dart:html' as html;
+import 'package:webview_flutter/webview_flutter.dart';
 
 void main() {
-  ui.platformViewRegistry.registerViewFactory(
-    'kasir-iframe',
-    (int viewId) => html.IFrameElement()
-      ..src = 'assets/assets/kasir.html'
-      ..style.border = 'none'
-      ..style.width = '100%'
-      ..style.height = '100%',
-  );
   runApp(const MyApp());
 }
 
@@ -21,10 +12,33 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'SDM Kasir',
       debugShowCheckedModeBanner: false,
-      home: Scaffold(
-        body: SafeArea(
-          child: HtmlElementView(viewType: 'kasir-iframe'),
-        ),
+      home: const KasirPage(),
+    );
+  }
+}
+
+class KasirPage extends StatefulWidget {
+  const KasirPage({super.key});
+  @override
+  State<KasirPage> createState() => _KasirPageState();
+}
+
+class _KasirPageState extends State<KasirPage> {
+  late final WebViewController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadFlutterAsset('assets/kasir.html');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: WebViewWidget(controller: _controller),
       ),
     );
   }
